@@ -1,0 +1,104 @@
+<div class="admin-content-body">
+    <div class="am-cf am-padding am-padding-bottom-0">
+        <div class="am-fl am-cf" th:unless=${isNew}><strong class="am-text-primary am-text-lg">修改产区资料</strong> /
+            <small>Edit district information</small>
+        </div>
+        <div class="am-fl am-cf" th:if=${isNew}><strong class="am-text-primary am-text-lg">新产区</strong> /
+            <small>Create district</small>
+        </div>
+    </div>
+
+    <hr/>
+
+    <div class="am-g" id="district-container" v-cloak>
+        <div class="am-u-sm-12 am-u-lg-10 am-u-lg-centered">
+            <form class="am-form am-form-horizontal">
+                <div class="am-form-group" th:unless=${isNew}>
+                    <label for="district-id" class="am-u-sm-4 am-u-md-3 am-form-label">产区ID / District ID</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="district-id" v-model="district.id" disabled>
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="district-name" class="am-u-sm-4 am-u-md-3 am-form-label">名称 / Name</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="district-name" v-model="district.name">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="district-description" class="am-u-sm-4 am-u-md-3 am-form-label">描述 / Description</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="district-description" v-model="district.description">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="workshop-selected" class="am-u-sm-4 am-u-md-3 am-form-label">所属车间 / Workshop</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <select id="workshop-selected"data-am-selected="{btnWidth: '100%',maxHeight: 150}" v-model="selected">
+                            <option v-for="workshop in workshops" v-bind:value="workshop.id">{{workshop.name}}
+                                ({{workshop.description}})
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <div class="am-u-sm-8 am-u-sm-push-4 am-u-md-9 am-u-md-push-3">
+                        <button type="button" class="am-btn am-btn-primary" v-on:click="submit">保存修改</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+    $(function () {
+        var $selected = $('#workshop-selected');
+        $selected.on('change',function () {
+            districtApp.selected = $(this).val();
+        })
+    });
+    var districtApp = new Vue({
+        el: "#district-container",
+        data: {
+            district: /*[[${district}]]*/{},
+            workshops: [],
+            selected: "",
+        },
+        created: function () {
+            $.ajax({
+                type: "POST",
+                url: "/api/workshop/findAll",
+                success: function (data) {
+                    districtApp.workshops = data.result;
+                    if (districtApp.district.workshop==null) {
+                        districtApp.selected = data.result[0].id;
+                    } else {
+                        districtApp.selected = districtApp.district.workshop.id;
+                    }
+                }
+            });
+        },
+        methods: {
+            submit: function () {
+                $.ajax({
+                    method: "POST",
+                    url: "/api/district/edit",
+                    data: {
+                        id: districtApp.district.id,
+                        name: districtApp.district.name,
+                        description: districtApp.district.description,
+                        workshopId: districtApp.selected,
+                    },
+                    success: function (data) {
+                        modalApp.showAlert(data.result);
+                    }
+                });
+            }
+        }
+    });
+</script>

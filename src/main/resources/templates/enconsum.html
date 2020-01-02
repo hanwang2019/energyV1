@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body style="height: 100%; margin: 0">
+
+<div class="row">
+    <div class="col-md-12" style="background-color: #3073f8;
+         box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+        <p><font size="4" face="arial" color="white">实时能耗（KWH）</font></p>
+    </div>
+</div>
+<div id="container" style="width: 80%;height:60%;"></div>
+
+
+
+<script type="text/javascript" src="https://cdn.bootcss.com/echarts/4.4.0-rc.1/echarts-en.min.js"></script>
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>-->
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=RguLb9mwhG3fapR9av6hiEVhThfMKd99&callback=initialize"></script>
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>-->
+<script type="text/javascript">
+
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+    var app = {};
+    option = null;
+    option = {
+        xAxis: {
+            type: 'category',
+            data: ['10：10：35', '10：10：36', '10：10：37', '10：10：38', '10：10：39', '10：10：40', '10：10：41','10：10：42', '10：10：43', '10：10：44', '10：10：45', '10：10：46', '10：10：47', '10：10：48']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: [820, 832, 851, 874, 880, 890, 920,950, 962, 981, 1014, 1030, 1050, 1080],
+            type: 'line'
+        }]
+    };
+    ;
+    if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+    }
+
+    function change()
+    {
+        var x = document.getElementById("first");
+        var y = document.getElementById("second");
+        y.options.length = 0; // 清除second下拉框的所有内容
+        if(x.selectedIndex == 0)
+        {
+            y.options.add(new Option("车铣中心", "0", false, true));
+            y.options.add(new Option("西门子立铣", "1"));
+            y.options.add(new Option("Fanuc立铣", "2"));
+            y.options.add(new Option("全部", "3"));
+        }
+
+        if(x.selectedIndex == 1)
+        {
+            y.options.add(new Option("机器人1", "0", false, true));
+            y.options.add(new Option("机器人2", "1"));
+            y.options.add(new Option("全部", "2"));
+        }
+
+    }
+
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+<div class="row">
+    <div class="col-md-12" style="background-color: #3073f8;
+         box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+        <p><font size="4" face="arial" color="white">类型选择</font></p>
+    </div>
+</div>
+<div class="col-md-12">
+    <p>
+        <font size="5">时间:
+            <input type="date" value="2019-06-21"/>
+        </font>
+        <font size="5">至:
+            <input type="date" value="2019-07-21"/>
+        </font>
+        <button style="width: 10%;"class="btn btn-info">查询</button>
+    </p>
+</div>
+<div class="row">
+    <div class="col-md-12" style="background-color: #3073f8;
+         box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+        <p><font size="4" face="arial" color="white">能耗排名</font></p>
+    </div>
+</div>
+<div id="container" style="width: 80%;height:60%;"></div>
+<div id="container1" style="width: 80%;height:60%;"></div>
+
+<script type="text/javascript" src="https://cdn.bootcss.com/echarts/4.4.0-rc.1/echarts-en.min.js"></script>
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>-->
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=RguLb9mwhG3fapR9av6hiEVhThfMKd99&callback=initialize"></script>
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>-->
+<script type="text/javascript">
+
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+    option = {
+        title: {
+            text: '',
+            subtext: ''
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        legend: {
+            data: ['2011年', '2012年']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            boundaryGap: [0, 0.01]
+        },
+        yAxis: {
+            type: 'category',
+            data: ['机器人一','机器人二','西门子立铣','Fanuc立铣','车铣中心']
+        },
+        series: [
+            {
+                name: '',
+                type: 'bar',
+                data: [ 23438, 31000, 121594, 134141, 181807]
+            }
+        ]
+    };
+
+
+    if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+    }
+    var dom1 = document.getElementById("container1");
+    var myChart1 = echarts.init(dom1);
+    option = {
+        toolbox: {
+            feature: {
+                restore: {},
+                saveAsImage: {}
+            }
+        },
+        series: [
+            {
+                name: '业务指标',
+                type: 'gauge',
+                detail: {formatter:'{value}%'},
+                data: [{value: 50, name: '完成率'}]
+            }
+        ]
+    };
+
+
+    if (option && typeof option === "object") {
+        myChart1.setOption(option, true);
+    }
+
+
+</script>
+</body>
+</html>

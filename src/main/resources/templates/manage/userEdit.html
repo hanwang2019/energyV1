@@ -1,0 +1,87 @@
+<div class="admin-content-body">
+    <div class="am-cf am-padding am-padding-bottom-0">
+        <div class="am-fl am-cf" th:unless=${isNew}><strong class="am-text-primary am-text-lg">修改用户资料</strong> /
+            <small>Edit user information</small>
+        </div>
+        <div class="am-fl am-cf" th:if=${isNew}><strong class="am-text-primary am-text-lg">新用户</strong> /
+            <small>Create user</small>
+        </div>
+    </div>
+
+    <hr/>
+
+    <div class="am-g" id="user-container" v-cloak>
+        <div class="am-u-sm-12 am-u-lg-10 am-u-lg-centered">
+            <form class="am-form am-form-horizontal">
+                <div class="am-form-group" th:unless=${isNew}>
+                    <label for="user-id" class="am-u-sm-4 am-u-md-3 am-form-label">用户ID / User ID</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="user-id" v-model="user.id" disabled>
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="user-name" class="am-u-sm-4 am-u-md-3 am-form-label">姓名 / Name</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="user-name" v-model="user.name">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="user-username" class="am-u-sm-4 am-u-md-3 am-form-label">用户名 / Username</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="user-username" v-model="user.username">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="user-password" class="am-u-sm-4 am-u-md-3 am-form-label">密码 / Password</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input th:unless=${isNew} type="text" id="user-password" placeholder="为空则不修改密码" v-model="user.password">
+                        <input th:if=${isNew} type="text" id="user-password" v-model="user.password">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="user-department" class="am-u-sm-4 am-u-md-3 am-form-label">部门 / Department</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="user-department" v-model="user.department">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <div class="am-u-sm-8 am-u-sm-push-4 am-u-md-9 am-u-md-push-3">
+                        <button type="button" class="am-btn am-btn-primary" v-on:click="submit">保存修改</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+    var userApp = new Vue({
+        el: "#user-container",
+        data: {
+            user: /*[[${user}]]*/{},
+        },
+        methods: {
+            submit: function () {
+                $.ajax({
+                    method: "POST",
+                    url: "/api/user/edit",
+                    data: {
+                        id: userApp.user.id,
+                        name: userApp.user.name,
+                        username: userApp.user.username,
+                        department: userApp.user.department,
+                        password: userApp.user.password,
+                    },
+                    success: function (data) {
+                        modalApp.showAlert(data.result);
+                    }
+                });
+            }
+        }
+    });
+</script>

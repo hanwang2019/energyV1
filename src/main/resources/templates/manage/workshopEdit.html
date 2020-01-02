@@ -1,0 +1,70 @@
+<div class="admin-content-body">
+    <div class="am-cf am-padding am-padding-bottom-0">
+        <div class="am-fl am-cf" th:unless=${isNew}><strong class="am-text-primary am-text-lg">修改车间资料</strong> /
+            <small>Edit workshop information</small>
+        </div>
+        <div class="am-fl am-cf" th:if=${isNew}><strong class="am-text-primary am-text-lg">新车间</strong> /
+            <small>Create workshop</small>
+        </div>
+    </div>
+
+    <hr/>
+
+    <div class="am-g" id="workshop-container" v-cloak>
+        <div class="am-u-sm-12 am-u-lg-10 am-u-lg-centered">
+            <form class="am-form am-form-horizontal">
+                <div class="am-form-group" th:unless=${isNew}>
+                    <label for="workshop-id" class="am-u-sm-4 am-u-md-3 am-form-label">车间ID / Workshop ID</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="workshop-id" v-model="workshop.id" disabled>
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="workshop-name" class="am-u-sm-4 am-u-md-3 am-form-label">车间名称 / Name</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="workshop-name" v-model="workshop.name">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="workshop-description" class="am-u-sm-4 am-u-md-3 am-form-label">描述 / Description</label>
+                    <div class="am-u-sm-8 am-u-md-9">
+                        <input type="text" id="workshop-description" v-model="workshop.description">
+                    </div>
+                </div>
+
+                <div class="am-form-group">
+                    <div class="am-u-sm-8 am-u-sm-push-4 am-u-md-9 am-u-md-push-3">
+                        <button type="button" class="am-btn am-btn-primary" v-on:click="submit">保存修改</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+    var workshopApp = new Vue({
+        el: "#workshop-container",
+        data: {
+            workshop: /*[[${workshop}]]*/{},
+        },
+        methods: {
+            submit: function () {
+                $.ajax({
+                    method: "POST",
+                    url: "/api/workshop/edit",
+                    data: {
+                        id: workshopApp.workshop.id,
+                        name: workshopApp.workshop.name,
+                        description: workshopApp.workshop.description,
+                    },
+                    success: function (data) {
+                        modalApp.showAlert(data.result);
+                    }
+                });
+            }
+        }
+    });
+</script>

@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body style=" margin: 0">
+<br>
+<div class="row">
+    <div class="col-md-12" style="background-color: #8fb7f8;">
+        <p>
+        <p>
+            <font size="4" >&nbsp
+                <select id="first" onChange="change()" style="width:8%">
+                    <option selected="selected">&nbsp&nbsp&nbsp&nbsp&nbsp类型</option>
+                    <option>&nbsp&nbsp&nbsp&nbsp&nbsp机床</option>
+                    <option>&nbsp&nbsp&nbsp&nbsp机器人</option>
+                </select>
+
+                <select id="second" onChange="sub()" style="width:8%">
+                    <option selected="selected">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp设备</option>
+                    <option>&nbsp&nbsp&nbsp车铣中心</option>
+                    <option>&nbsp&nbsp西门子立铣</option>
+                    <option>&nbsp&nbspFanuc立铣</option>
+                </select>
+            </font>
+        <p>
+
+        </p>
+    </div>
+</div>
+<font size="4" >
+    <div style="margin:auto;text-align:center" >
+        <input type="text" id="txt" value="车铣中心功率走势图"  size="4" style="border:0px;background:rgba(0, 0, 0, 0);margin:auto;text-align:center;width: 350px;font-weight:100  ">
+    </div>
+</font>
+<div id="container" style="width: 90%;height:60%;"></div>
+<br>
+<div  style="width: 100%;height:50%;">
+    <div class="col-md-1"style="height: 50%;width: 2.5%"></div>
+    <div class="col-md-2" id="pie1" style="height: 50%;width: 15%"></div>
+    <div class="col-md-2" id="pie2" style="height: 50%;width: 15%"></div>
+    <div class="col-md-2" id="pie3" style="height: 50%;width: 15%"></div>
+    <div class="col-md-10"style="height: 50%;width: 5%"></div>
+    <div class="col-md-2" id="pie4" style="height: 50%;width: 15%"></div>
+    <div class="col-md-2" id="pie5" style="height: 50%;width: 15%"></div>
+    <div class="col-md-2" id="pie6" style="height: 50%;width: 15%"></div>
+    <div class="col-md-6" style="margin:auto;text-align:center" >
+        <input type="text" id="txt1" value="三项电压图"  size="4" style="border:0px;background:rgba(0, 0, 0, 0);margin:auto;text-align:center;width: 350px;font-weight:100  ">
+    </div>
+    <div class="col-md-6" style="margin:auto;text-align:center" >
+        <input type="text" id="txt2" value="三项电流图"  size="4" style="border:0px;background:rgba(0, 0, 0, 0);margin:auto;text-align:center;width: 350px;font-weight:100  ">
+    </div>
+</div>
+
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript">
+
+    var lineurl = "http://localhost:8080/api/cache/getLastTen?deviceId=2c98666b-ab0c-4be0-a600-3adc46497680";
+    var gaugeurl = "http://localhost:8080/api/cache/getLastCacheByDeviceId?deviceId=2c98666b-ab0c-4be0-a600-3adc46497680";
+    function change()
+    {
+        var x = document.getElementById("first");
+        var y = document.getElementById("second");
+        y.options.length = 0; // 清除second下拉框的所有内容
+        if(x.selectedIndex == 1)
+        {
+            y.options.add(new Option("设备", "设备", false, true));
+            y.options.add(new Option("车铣中心", "车铣中心功率走势图"));
+            y.options.add(new Option("西门子立铣", "西门子立铣功率走势图"));
+            y.options.add(new Option("Fanuc立铣", "Fanuc立铣功率走势图"));
+        }
+
+        if(x.selectedIndex == 2)
+        {
+            y.options.add(new Option("设备", "设备", false, true));
+            y.options.add(new Option("机器人1", "机器人1功率走势图"));
+            y.options.add(new Option("机器人2", "机器人2功率走势图"));
+        }
+
+    }
+
+    function sub(){
+        var hero=document.getElementById("second");
+        var index=hero.selectedIndex;
+        document.getElementById("txt").value=hero.options[index].value;
+
+        var x = document.getElementById("first");
+        var y = document.getElementById("second");
+        if(x.selectedIndex == 1 && y.selectedIndex == 1)
+        {
+            lineurl = "http://localhost:8080/api/cache/getLastTen?deviceId=2c98666b-ab0c-4be0-a600-3adc46497680";
+            gaugeurl = "http://localhost:8080/api/cache/getLastCacheByDeviceId?deviceId=2c98666b-ab0c-4be0-a600-3adc46497680";
+
+            var times=[];    //类别数组（实际用来盛放X轴坐标值）
+            var nums=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : lineurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result) {
+                    if (result) {
+                        var res=result.result;
+                        for(var i=res.length-1;i>=0;i--){
+                            times.push(res[i].time.split(" ")[1]);    //挨个取出类别并填入类别数组
+                        }
+                        for(var i=res.length-1;i>=0;i--){
+                            nums.push(res[i].power);    //挨个取出销量并填入销量数组
+                        }
+                        myChart.hideLoading();    //隐藏加载动画
+                        myChart.setOption({        //加载数据图表
+
+                            xAxis: {
+                                name:'时间(s)',
+                                type: 'category',
+                                data: times
+                            },
+                            yAxis: {
+                                name:'功率（W）',
+                                type: 'value'
+                            },
+                            series: [{
+                                data: nums,
+                                type: 'line'
+                            }]
+                        });
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart.hideLoading();
+                }
+            })
+
+            var num1=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result1) {
+                    if (result1) {
+                        var res1=result1.result;
+                        for(var i=res1.length-1;i>=0;i--){
+                            num1.push(res1[i].voltage_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart1.hideLoading();    //隐藏加载动画
+                        myChart1.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电压(V)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 300,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num1[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart1.hideLoading();
+                }
+            })
+
+            var num2 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result2) {
+                    if (result2) {
+                        var res2=result2.result;
+                        for(var i=res2.length-1;i>=0;i--){
+                            num2.push(res2[i].current_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart2.hideLoading();    //隐藏加载动画
+                        myChart2.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电流(A)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 20,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num2[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart2.hideLoading();
+                }
+            })
+
+            var num3 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result3) {
+                    if (result3) {
+                        var res3=result3.result;
+                        for(var i=res3.length-1;i>=0;i--){
+                            num3.push(res3[i].power);    //挨个取出类别并填入类别数组
+                        }
+                        myChart3.hideLoading();    //隐藏加载动画
+                        myChart3.setOption({        //加载数据图表
+                            title: {
+                                text: '功率(W)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 3000,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num3[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart3.hideLoading();
+                }
+            })
+            if (option && typeof option === "object") {
+                myChart3.setOption(option, true);
+            }
+        }
+        if(x.selectedIndex == 1 && y.selectedIndex == 2)
+        {
+            lineurl = "http://localhost:8080/api/cache/getLastTen?deviceId=b0824e98-6750-453d-835c-5093b31d9e09";
+            gaugeurl = "http://localhost:8080/api/cache/getLastCacheByDeviceId?deviceId=b0824e98-6750-453d-835c-5093b31d9e09";
+            var times=[];    //类别数组（实际用来盛放X轴坐标值）
+            var nums=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : lineurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result) {
+                    if (result) {
+                        var res=result.result;
+                        for(var i=res.length-1;i>=0;i--){
+                            times.push(res[i].time.split(" ")[1]);    //挨个取出类别并填入类别数组
+                        }
+                        for(var i=res.length-1;i>=0;i--){
+                            nums.push(res[i].power);    //挨个取出销量并填入销量数组
+                        }
+                        myChart.hideLoading();    //隐藏加载动画
+                        myChart.setOption({        //加载数据图表
+
+                            xAxis: {
+                                name:'时间(s)',
+                                type: 'category',
+                                data: times
+                            },
+                            yAxis: {
+                                name:'功率（W）',
+                                type: 'value'
+                            },
+                            series: [{
+                                data: nums,
+                                type: 'line'
+                            }]
+                        });
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart.hideLoading();
+                }
+            })
+
+            var num1=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result1) {
+                    if (result1) {
+                        var res1=result1.result;
+                        for(var i=res1.length-1;i>=0;i--){
+                            num1.push(res1[i].voltage_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart1.hideLoading();    //隐藏加载动画
+                        myChart1.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电压(V)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 300,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num1[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart1.hideLoading();
+                }
+            })
+
+            var num2 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result2) {
+                    if (result2) {
+                        var res2=result2.result;
+                        for(var i=res2.length-1;i>=0;i--){
+                            num2.push(res2[i].current_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart2.hideLoading();    //隐藏加载动画
+                        myChart2.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电流(A)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 20,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num2[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart2.hideLoading();
+                }
+            })
+
+            var num3 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result3) {
+                    if (result3) {
+                        var res3=result3.result;
+                        for(var i=res3.length-1;i>=0;i--){
+                            num3.push(res3[i].power);    //挨个取出类别并填入类别数组
+                        }
+                        myChart3.hideLoading();    //隐藏加载动画
+                        myChart3.setOption({        //加载数据图表
+                            title: {
+                                text: '功率(W)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 3000,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num3[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart3.hideLoading();
+                }
+            })
+            if (option && typeof option === "object") {
+                myChart3.setOption(option, true);
+            }
+        }
+        if(x.selectedIndex == 1&&y.selectedIndex == 3)
+        {
+            lineurl = "http://localhost:8080/api/cache/getLastTen?deviceId=abceb222-b6f8-4ce9-b25a-7dadc2b1e1a6";
+            gaugeurl = "http://localhost:8080/api/cache/getLastCacheByDeviceId?deviceId=abceb222-b6f8-4ce9-b25a-7dadc2b1e1a6";
+            var times=[];    //类别数组（实际用来盛放X轴坐标值）
+            var nums=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : lineurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result) {
+                    if (result) {
+                        var res=result.result;
+                        for(var i=res.length-1;i>=0;i--){
+                            times.push(res[i].time.split(" ")[1]);    //挨个取出类别并填入类别数组
+                        }
+                        for(var i=res.length-1;i>=0;i--){
+                            nums.push(res[i].power);    //挨个取出销量并填入销量数组
+                        }
+                        myChart.hideLoading();    //隐藏加载动画
+                        myChart.setOption({        //加载数据图表
+
+                            xAxis: {
+                                name:'时间(s)',
+                                type: 'category',
+                                data: times
+                            },
+                            yAxis: {
+                                name:'功率（W）',
+                                type: 'value'
+                            },
+                            series: [{
+                                data: nums,
+                                type: 'line'
+                            }]
+                        });
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart.hideLoading();
+                }
+            })
+
+            var num1=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result1) {
+                    if (result1) {
+                        var res1=result1.result;
+                        for(var i=res1.length-1;i>=0;i--){
+                            num1.push(res1[i].voltage_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart1.hideLoading();    //隐藏加载动画
+                        myChart1.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电压(V)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 300,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num1[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart1.hideLoading();
+                }
+            })
+
+            var num2 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result2) {
+                    if (result2) {
+                        var res2=result2.result;
+                        for(var i=res2.length-1;i>=0;i--){
+                            num2.push(res2[i].current_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart2.hideLoading();    //隐藏加载动画
+                        myChart2.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电流(A)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 20,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num2[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart2.hideLoading();
+                }
+            })
+
+            var num3 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result3) {
+                    if (result3) {
+                        var res3=result3.result;
+                        for(var i=res3.length-1;i>=0;i--){
+                            num3.push(res3[i].power);    //挨个取出类别并填入类别数组
+                        }
+                        myChart3.hideLoading();    //隐藏加载动画
+                        myChart3.setOption({        //加载数据图表
+                            title: {
+                                text: '功率(W)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 3000,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num3[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart3.hideLoading();
+                }
+            })
+            if (option && typeof option === "object") {
+                myChart3.setOption(option, true);
+            }
+        }
+        if(x.selectedIndex == 2 && y.selectedIndex == 1)
+        {
+            lineurl = "http://localhost:8080/api/cache/getLastTen?deviceId=8d0dee44-1009-42d9-b5c5-b118d6e43835";
+            gaugeurl = "http://localhost:8080/api/cache/getLastCacheByDeviceId?deviceId=8d0dee44-1009-42d9-b5c5-b118d6e43835";
+            var times=[];    //类别数组（实际用来盛放X轴坐标值）
+            var nums=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : lineurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result) {
+                    if (result) {
+                        var res=result.result;
+                        for(var i=res.length-1;i>=0;i--){
+                            times.push(res[i].time.split(" ")[1]);    //挨个取出类别并填入类别数组
+                        }
+                        for(var i=res.length-1;i>=0;i--){
+                            nums.push(res[i].power);    //挨个取出销量并填入销量数组
+                        }
+                        myChart.hideLoading();    //隐藏加载动画
+                        myChart.setOption({        //加载数据图表
+
+                            xAxis: {
+                                name:'时间(s)',
+                                type: 'category',
+                                data: times
+                            },
+                            yAxis: {
+                                name:'功率（W）',
+                                type: 'value'
+                            },
+                            series: [{
+                                data: nums,
+                                type: 'line'
+                            }]
+                        });
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart.hideLoading();
+                }
+            })
+
+            var num1=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result1) {
+                    if (result1) {
+                        var res1=result1.result;
+                        for(var i=res1.length-1;i>=0;i--){
+                            num1.push(res1[i].voltage_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart1.hideLoading();    //隐藏加载动画
+                        myChart1.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电压(V)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 300,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num1[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart1.hideLoading();
+                }
+            })
+
+            var num2 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result2) {
+                    if (result2) {
+                        var res2=result2.result;
+                        for(var i=res2.length-1;i>=0;i--){
+                            num2.push(res2[i].current_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart2.hideLoading();    //隐藏加载动画
+                        myChart2.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电流(A)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 20,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num2[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart2.hideLoading();
+                }
+            })
+
+            var num3 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result3) {
+                    if (result3) {
+                        var res3=result3.result;
+                        for(var i=res3.length-1;i>=0;i--){
+                            num3.push(res3[i].power);    //挨个取出类别并填入类别数组
+                        }
+                        myChart3.hideLoading();    //隐藏加载动画
+                        myChart3.setOption({        //加载数据图表
+                            title: {
+                                text: '功率(W)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 3000,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num3[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart3.hideLoading();
+                }
+            })
+            if (option && typeof option === "object") {
+                myChart3.setOption(option, true);
+            }
+        }
+        if(x.selectedIndex == 2 && y.selectedIndex == 2)
+        {
+            lineurl = "http://localhost:8080/api/cache/getLastTen?deviceId=d5df724e-2810-4414-8b8b-2f418bb4fbc4";
+            gaugeurl = "http://localhost:8080/api/cache/getLastCacheByDeviceId?deviceId=d5df724e-2810-4414-8b8b-2f418bb4fbc4";
+            var times=[];    //类别数组（实际用来盛放X轴坐标值）
+            var nums=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : lineurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result) {
+                    if (result) {
+                        var res=result.result;
+                        for(var i=res.length-1;i>=0;i--){
+                            times.push(res[i].time.split(" ")[1]);    //挨个取出类别并填入类别数组
+                        }
+                        for(var i=res.length-1;i>=0;i--){
+                            nums.push(res[i].power);    //挨个取出销量并填入销量数组
+                        }
+                        myChart.hideLoading();    //隐藏加载动画
+                        myChart.setOption({        //加载数据图表
+
+                            xAxis: {
+                                name:'时间(s)',
+                                type: 'category',
+                                data: times
+                            },
+                            yAxis: {
+                                name:'功率（W）',
+                                type: 'value'
+                            },
+                            series: [{
+                                data: nums,
+                                type: 'line'
+                            }]
+                        });
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart.hideLoading();
+                }
+            })
+
+            var num1=[];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result1) {
+                    if (result1) {
+                        var res1=result1.result;
+                        for(var i=res1.length-1;i>=0;i--){
+                            num1.push(res1[i].voltage_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart1.hideLoading();    //隐藏加载动画
+                        myChart1.setOption({        //加载数据图表
+
+
+                            title: {
+                                text: '电压(V)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 300,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num1[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart1.hideLoading();
+                }
+            })
+
+            var num2 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result2) {
+                    if (result2) {
+                        var res2=result2.result;
+                        for(var i=res2.length-1;i>=0;i--){
+                            num2.push(res2[i].current_a);    //挨个取出类别并填入类别数组
+                        }
+                        myChart2.hideLoading();    //隐藏加载动画
+                        myChart2.setOption({        //加载数据图表
+                            title: {
+                                text: '电流(A)',
+                                x: 'center',
+                                y: 'bottom'
+                            },
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 20,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num2[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart2.hideLoading();
+                }
+            })
+
+            var num3 = [];
+            $.ajax({
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                url : gaugeurl,    //请求发送到TestServlet处
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result3) {
+                    if (result3) {
+                        var res3=result3.result;
+                        for(var i=res3.length-1;i>=0;i--){
+                            num3.push(res3[i].power);    //挨个取出类别并填入类别数组
+                        }
+                        myChart3.hideLoading();    //隐藏加载动画
+                        myChart3.setOption({        //加载数据图表
+
+                            series: [
+                                {
+                                    name: '业务指标',
+                                    min: 0,
+                                    max: 3000,
+                                    type: 'gauge',
+                                    radius: "100%",
+                                    detail: {
+                                        formatter: "{score|{value}}",
+                                        offsetCenter: [0, "65%"],
+                                        height: 30,
+                                        rich: {
+                                            score: {
+                                                color: "black",
+                                                fontFamily: "微软雅黑",
+                                                fontSize: 20
+                                            }
+                                        }
+                                    },
+                                    data: [{
+                                        value: num3[0],
+                                        label: {
+                                            textStyle: {
+                                                fontSize: 10
+                                            }
+                                        }
+                                    }]
+                                }
+                            ]
+                        })
+                    }
+                },
+                error : function(errorMsg) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+                    myChart3.hideLoading();
+                }
+            })
+            if (option && typeof option === "object") {
+                myChart3.setOption(option, true);
+            }
+        }
+    }
+
+
+
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+    var app = {};
+    option = null;
+    option = {
+    };
+
+    myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+
+    var times=[];    //类别数组（实际用来盛放X轴坐标值）
+    var nums=[];    //销量数组（实际用来盛放Y坐标值）
+
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : lineurl,    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result) {
+            if (result) {
+                var res=result.result;
+                for(var i=res.length-1;i>=0;i--){
+                    times.push(res[i].time.split(" ")[1]);    //挨个取出类别并填入类别数组
+                }
+                for(var i=res.length-1;i>=0;i--){
+                    nums.push(res[i].power);    //挨个取出销量并填入销量数组
+                }
+                myChart.hideLoading();    //隐藏加载动画
+                myChart.setOption({        //加载数据图表
+
+                    xAxis: {
+                        name:'时间(s)',
+                        type: 'category',
+                        data: times
+                    },
+                    yAxis: {
+                        name:'功率（W）',
+                        type: 'value'
+                    },
+                    series: [{
+                        data: nums,
+                        type: 'line'
+                    }]
+                });
+
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart.hideLoading();
+        }
+    })
+
+    var dom1 = document.getElementById("pie1");
+    var myChart1 = echarts.init(dom1);
+    var app1 = {};
+    option = null;
+    option = {
+    };
+    myChart1.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var num1 = [];
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : gaugeurl,    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result1) {
+            if (result1) {
+                var res1=result1.result;
+                for(var i=res1.length-1;i>=0;i--){
+                    num1.push(res1[i].voltage_a);    //挨个取出类别并填入类别数组
+                }
+                console.log(num1);
+                myChart1.hideLoading();    //隐藏加载动画
+                myChart1.setOption({        //加载数据图表
+
+
+                    title: {
+                        text: 'A项电压(V)',
+                        x: 'center',
+                        y: 'bottom',
+                        textStyle: {
+                            fontWeight:'lighter'
+                        }
+                    },
+
+                    series: [
+                        {
+                            name: '业务指标',
+                            min: 0,
+                            max: 300,
+                            type: 'gauge',
+                            radius: "100%",
+                            detail: {
+                                formatter: "{score|{value}}",
+                                offsetCenter: [0, "65%"],
+                                height: 30,
+                                rich: {
+                                    score: {
+                                        color: "black",
+                                        fontFamily: "微软雅黑",
+                                        fontSize: 20,
+                                        fontWeight:'lighter'
+                                    }
+                                }
+                            },
+                            data: [{
+                                value: num1[0],
+                                label: {
+                                    textStyle: {
+                                        fontSize: 10
+                                    }
+                                }
+                            }]
+                        }
+                    ]
+                })
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart1.hideLoading();
+        }
+    })
+
+
+
+    if (option && typeof option === "object") {
+        myChart1.setOption(option, true);
+    }
+
+    var dom2 = document.getElementById("pie2");
+    var myChart2 = echarts.init(dom2);
+    var app2 = {};
+    option = null;
+    option = {
+    };
+    myChart2.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var num2 = [];
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : gaugeurl,    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result2) {
+            if (result2) {
+                var res2=result2.result;
+                for(var i=res2.length-1;i>=0;i--){
+                    num2.push(res2[i].voltage_b);    //挨个取出类别并填入类别数组
+                }
+                myChart2.hideLoading();    //隐藏加载动画
+                myChart2.setOption({        //加载数据图表
+
+
+                    title: {
+                        text: 'B项电压(V)',
+                        x: 'center',
+                        y: 'bottom',
+                        textStyle: {
+                            fontWeight:'lighter'
+                        }
+                    },
+
+                    series: [
+                        {
+                            name: '业务指标',
+                            min: 0,
+                            max: 300,
+                            type: 'gauge',
+                            radius: "100%",
+                            detail: {
+                                formatter: "{score|{value}}",
+                                offsetCenter: [0, "65%"],
+                                height: 30,
+                                rich: {
+                                    score: {
+                                        color: "black",
+                                        fontFamily: "微软雅黑",
+                                        fontSize: 20,
+                                        fontWeight:'lighter'
+                                    }
+                                }
+                            },
+                            data: [{
+                                value: num2[0],
+                                label: {
+                                    textStyle: {
+                                        fontSize: 10
+                                    }
+                                }
+                            }]
+                        }
+                    ]
+                })
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart2.hideLoading();
+        }
+    })
+
+    var dom3 = document.getElementById("pie3");
+    var myChart3 = echarts.init(dom3);
+    var app3 = {};
+    option = null;
+    option = {
+    };
+    myChart3.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var num3 = [];
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : gaugeurl,    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result3) {
+            if (result3) {
+                var res3=result3.result;
+                for(var i=res3.length-1;i>=0;i--){
+                    num3.push(res3[i].voltage_c);    //挨个取出类别并填入类别数组
+                }
+                myChart3.hideLoading();    //隐藏加载动画
+                myChart3.setOption({        //加载数据图表
+
+
+                    title: {
+                        text: 'C项电压(V)',
+                        x: 'center',
+                        y: 'bottom',
+                        textStyle: {
+                            fontWeight:'lighter'
+                        }
+                    },
+
+                    series: [
+                        {
+                            name: '业务指标',
+                            min: 0,
+                            max: 300,
+                            type: 'gauge',
+                            radius: "100%",
+                            detail: {
+                                formatter: "{score|{value}}",
+                                offsetCenter: [0, "65%"],
+                                height: 30,
+                                rich: {
+                                    score: {
+                                        color: "black",
+                                        fontFamily: "微软雅黑",
+                                        fontSize: 20,
+                                        fontWeight:'lighter'
+                                    }
+                                }
+                            },
+                            data: [{
+                                value: num3[0],
+                                label: {
+                                    textStyle: {
+                                        fontSize: 10
+                                    }
+                                }
+                            }]
+                        }
+                    ]
+                })
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart3.hideLoading();
+        }
+    })
+    if (option && typeof option === "object") {
+        myChart3.setOption(option, true);
+    }
+
+
+    var dom4 = document.getElementById("pie4");
+    var myChart4 = echarts.init(dom4);
+    var app4 = {};
+    option = null;
+    option = {
+    };
+    myChart4.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var num4 = [];
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : gaugeurl,    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result4) {
+            if (result4) {
+                var res4=result4.result;
+                for(var i=res4.length-1;i>=0;i--){
+                    num4.push(res4[i].current_a);    //挨个取出类别并填入类别数组
+                }
+                console.log(num1);
+                myChart4.hideLoading();    //隐藏加载动画
+                myChart4.setOption({        //加载数据图表
+
+
+                    title: {
+                        text: 'A项电流(A)',
+                        x: 'center',
+                        y: 'bottom',
+                        textStyle: {
+                            fontWeight:'lighter'
+                        }
+                    },
+
+                    series: [
+                        {
+                            name: '业务指标',
+                            min: 0,
+                            max: 20,
+                            type: 'gauge',
+                            radius: "100%",
+                            detail: {
+                                formatter: "{score|{value}}",
+                                offsetCenter: [0, "65%"],
+                                height: 30,
+                                rich: {
+                                    score: {
+                                        color: "black",
+                                        fontFamily: "微软雅黑",
+                                        fontSize: 20,
+                                        fontWeight:'lighter'
+                                    }
+                                }
+                            },
+                            data: [{
+                                value: num4[0],
+                                label: {
+                                    textStyle: {
+                                        fontSize: 10
+                                    }
+                                }
+                            }]
+                        }
+                    ]
+                })
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart4.hideLoading();
+        }
+    })
+
+
+
+    if (option && typeof option === "object") {
+        myChart4.setOption(option, true);
+    }
+
+    var dom5 = document.getElementById("pie5");
+    var myChart5 = echarts.init(dom5);
+    var app5 = {};
+    option = null;
+    option = {
+    };
+    myChart5.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var num5 = [];
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : gaugeurl,    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result5) {
+            if (result5) {
+                var res5=result5.result;
+                for(var i=res5.length-1;i>=0;i--){
+                    num5.push(res5[i].current_b);    //挨个取出类别并填入类别数组
+                }
+                myChart5.hideLoading();    //隐藏加载动画
+                myChart5.setOption({        //加载数据图表
+
+
+                    title: {
+                        text: 'B项电流(A)',
+                        x: 'center',
+                        y: 'bottom',
+                        textStyle: {
+                            fontWeight:'lighter'
+                        }
+                    },
+
+                    series: [
+                        {
+                            name: '业务指标',
+                            min: 0,
+                            max: 20,
+                            type: 'gauge',
+                            radius: "100%",
+                            detail: {
+                                formatter: "{score|{value}}",
+                                offsetCenter: [0, "65%"],
+                                height: 30,
+                                rich: {
+                                    score: {
+                                        color: "black",
+                                        fontFamily: "微软雅黑",
+                                        fontSize: 20,
+                                        fontWeight:'lighter'
+                                    }
+                                }
+                            },
+                            data: [{
+                                value: num5[0],
+                                label: {
+                                    textStyle: {
+                                        fontSize: 10
+                                    }
+                                }
+                            }]
+                        }
+                    ]
+                })
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart5.hideLoading();
+        }
+    })
+
+    var dom6 = document.getElementById("pie6");
+    var myChart6 = echarts.init(dom6);
+    var app6 = {};
+    option = null;
+    option = {
+    };
+    myChart6.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var num6 = [];
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : gaugeurl,    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result6) {
+            if (result6) {
+                var res6=result6.result;
+                for(var i=res6.length-1;i>=0;i--){
+                    num6.push(res6[i].current_c);    //挨个取出类别并填入类别数组
+                }
+                myChart6.hideLoading();    //隐藏加载动画
+                myChart6.setOption({        //加载数据图表
+
+
+                    title: {
+                        text: 'C项电流(A)',
+                        x: 'center',
+                        y: 'bottom',
+                        textStyle: {
+                            fontWeight:'lighter'
+                        }
+                    },
+
+                    series: [
+                        {
+                            name: '业务指标',
+                            min: 0,
+                            max: 20,
+                            type: 'gauge',
+                            radius: "100%",
+                            detail: {
+                                formatter: "{score|{value}}",
+                                offsetCenter: [0, "65%"],
+                                height: 30,
+                                rich: {
+                                    score: {
+                                        color: "black",
+                                        fontFamily: "微软雅黑",
+                                        fontSize: 20,
+                                        fontWeight:'lighter'
+                                    }
+                                }
+                            },
+                            data: [{
+                                value: num6[0],
+                                label: {
+                                    textStyle: {
+                                        fontSize: 10
+                                    }
+                                }
+                            }]
+                        }
+                    ]
+                })
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart6.hideLoading();
+        }
+    })
+    if (option && typeof option === "object") {
+        myChart6.setOption(option, true);
+    }
+
+    if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+    }
+
+
+</script>
+</body>
+</html>
